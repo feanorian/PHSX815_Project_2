@@ -85,7 +85,7 @@ if __name__ == "__main__":
 	
 	# Alpha vectors for each population
 	alpha_H0 = [1,2,3]
-	alpha_H1 = [1,1,1]
+	alpha_H1 = [4,9,5]
 	# Number of urns in each population
 	N_urn_pop = 10000
 	
