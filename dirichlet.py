@@ -20,6 +20,27 @@ import random
 
 if __name__ == "__main__":
 	np.random.seed(898)
+	
+
+
+	if '-h' in sys.argv or '--help' in sys.argv:
+		print ("Usage: %s [-t -n]" % sys.argv[0])
+		print
+		sys.exit(1)
+	if '-t' in sys.argv:
+		p = sys.argv.index('-t')
+		N_urns_sample = int(sys.argv[p+1]) #number of sample urns
+	else:
+		N_urns_sample = 1000
+	if '-n' in sys.argv:
+		p = sys.argv.index('-n')
+		N_marbles_draws = int(sys.argv[p+1])
+	else:
+		N_marbles_draws = 100 # number of marble draws per urn
+	
+
+
+
 	# Function that constructs an urn  passing the number of trials and probability array for the urn. 
 	def Category(trials, prob):
 		x = np.random.multinomial(trials, prob, 1)
@@ -54,8 +75,6 @@ if __name__ == "__main__":
 		urnh0_dic = []
 		for urn in color_list:
 			trial = {'white':urn.count('White'), 'green': urn.count('Green'), 'black':urn.count('Black')}
-			#trial = {'white':round(urn.count('White')/len(urn), 3), 'green': round(urn.count('Green')/len(urn), 3), 'black':round(urn.count('Black')/len(urn), 3)}
-
 			urnh0_dic.append(trial)
 		#labels = urnh0_dic[0].keys()
 		dfH0 = pd.DataFrame(urnh0_dic)
@@ -66,16 +85,17 @@ if __name__ == "__main__":
 	
 	# Alpha vectors for each population
 	alpha_H0 = [1,2,3]
-	alpha_H1 = [4,9,5]
+	alpha_H1 = [1,1,1]
 	# Number of urns in each population
 	N_urn_pop = 10000
-	# Number of urns to sample from N_urn_pop
-	N_sample = 1000
+	
+	
 	# Number of marbles per urn
 	N_marbles_urn = 10000
-	#number of draws per urn
-	N_marbles_draws = 1000
-	InputFile_H0 = 'alpha_H0.csv'
+	
+	
+	#Name of file to write data. Notice it changes based on parameters
+	InputFile_H0 = f'alpha_H0_D_{N_marbles_draws}_T_{N_urns_sample}.csv'
 
 	# Urns in alpha_H0
 	urns_H0 = np.random.dirichlet(alpha_H0, N_urn_pop)
@@ -99,7 +119,7 @@ if __name__ == "__main__":
 		outcomes_list.append(outcome)
 	
 	
-	urns_color_sampled =  color_samples(1000, 1000)
+	urns_color_sampled =  color_samples(N_urns_sample, N_marbles_draws)
 	table_H0 = color_success(urns_color_sampled)
 	
 	doOutputFile = True
@@ -165,5 +185,6 @@ if __name__ == "__main__":
 	plt.title('Distribution of Probabilities for White Marbles in Right(H1)')
 	#plt.savefig('WhiteH1.png', dpi=700)
 	plt.show()
+
 
 	
