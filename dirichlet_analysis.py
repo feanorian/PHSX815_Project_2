@@ -40,19 +40,18 @@ if __name__ == "__main__":
 	
 	# alpha vectors used in experiment
 	alpha_H0 = [1,2,3]
-	alpha_H1 = [1,1,1]
+	alpha_H1 = [4,9,5]
 	
-	table_H0['sum'] = table_H0.sum(axis=1)
-	
-	total = table_H0['sum']
-	
+	# Number of draws per trial
+	total = np.sum([pH0_white[0], pH0_green[0], pH0_black[0]])
+
 	# sum of each alpha vector as input for likelihood functions
 	alphaH0_sum = np.sum(alpha_H0)
 	alphaH1_sum = np.sum(alpha_H1)
 	
 	# Numerator for likelihood functions that is based on sum of alpha vectors and the number of trials
-	beta_H0 = beta(len(pH0_white), alphaH0_sum)
-	beta_H1 = beta(len(pH0_white), alphaH1_sum)
+	beta_H0 = beta(total, alphaH0_sum)
+	beta_H1 = beta(total, alphaH1_sum)
 
 	likelihood_H0 = []
 	likelihood_H1 = []
@@ -60,9 +59,9 @@ if __name__ == "__main__":
 	# Calculates likelihood of each hypothesis
 	for i in range(len(table_H0)):
 		
-		LH0 = (beta_H1/beta_H0)*(beta(pH0_white[i], alpha_H1[0]) *  beta(pH0_green[i], alpha_H1[1]) * beta(pH0_black[i], alpha_H1[2])) \
+		LH0 = (beta_H0/beta_H1)*(beta(pH0_white[i], alpha_H1[0]) *  beta(pH0_green[i], alpha_H1[1]) * beta(pH0_black[i], alpha_H1[2])) \
 				/ (beta(pH0_white[i], alpha_H0[0]) *  beta(pH0_green[i], alpha_H0[1]) * beta(pH0_black[i], alpha_H0[2]))
-		LH1 = (beta_H0/beta_H1)*(beta(pH0_white[i], alpha_H0[0]) *  beta(pH0_green[i], alpha_H0[1]) * beta(pH0_black[i], alpha_H0[2])) \
+		LH1 = (beta_H1/beta_H0)*(beta(pH0_white[i], alpha_H0[0]) *  beta(pH0_green[i], alpha_H0[1]) * beta(pH0_black[i], alpha_H0[2])) \
 				/ (beta(pH0_white[i], alpha_H1[0]) *  beta(pH0_green[i], alpha_H1[1]) * beta(pH0_black[i], alpha_H1[2]))
 		likelihood_H0.append(LH0)
 		likelihood_H1.append(LH1)
@@ -72,7 +71,7 @@ if __name__ == "__main__":
 	sns.histplot(np.log(likelihood_H0),stat='probability', bins=10, element="step", color = 'blue', alpha= .5, label=rf'H0 - $\alpha = {str(alpha_H0)}$')
 	sns.histplot(np.log(likelihood_H1),stat='probability', bins=10, element="step", color = 'orange', alpha= .5, label=rf'H1 - $\alpha = {str(alpha_H1)}$')
 	plt.xlabel('Log-Likelihood (log(P(X | H0)/ P(X| H1)))')
-	plt.title(rf'Log Likelihood for $\alpha = {str(alpha_H0)}$ vs $\alpha = {str(alpha_H1)}$, {len(pH0_white)} trials')
-	#plt.savefig(f'LLH0_{len(pH0_white)}')
+	plt.title(rf'Log Likelihood for $\alpha = {str(alpha_H0)}$ vs $\alpha = {str(alpha_H1)}$, {total} draws')
 	plt.legend()
+	#plt.savefig(f'LLH0_{total}')
 	plt.show()
