@@ -16,7 +16,6 @@ import csv
 import pandas as pd
 import seaborn as sns
 import random
-import matplotlib.tri as tri
 from scipy.special import beta
 
 if __name__ == "__main__":
@@ -30,48 +29,55 @@ if __name__ == "__main__":
 	# Opens the datafile and reads it into array   
 	
 	with open(InputFile) as file:
-		table_H0 = pd.read_csv(file, usecols=range(1,4))
-		print(table_H0.head()) 
+		table = pd.read_csv(file)
+		print(table.head()) 
 	
 	# Arrays that store the counts of each category for all trials
-	pH0_white = table_H0['white']
-	pH0_green = table_H0['green'] 
-	pH0_black = table_H0['black']
+	pH0_white = table['white H0'] 
+	pH0_black = table['black H0']
 	
+	pH1_white = table['white H1'] 
+	pH1_black = table['black H1']
+
 	# alpha vectors used in experiment
-	alpha_H0 = [1,2,3]
-	alpha_H1 = [4,9,5]
+	alpha_H0 = [1,2]
+	alpha_H1 = [8,9]
 	
-	# Number of draws per trial
-	total = np.sum([pH0_white[0], pH0_green[0], pH0_black[0]])
+	
+	total = np.sum([pH0_white[0], pH0_black[0]])
 
 	# sum of each alpha vector as input for likelihood functions
 	alphaH0_sum = np.sum(alpha_H0)
 	alphaH1_sum = np.sum(alpha_H1)
-	
+
 	# Numerator for likelihood functions that is based on sum of alpha vectors and the number of trials
 	beta_H0 = beta(total, alphaH0_sum)
 	beta_H1 = beta(total, alphaH1_sum)
 
-	likelihood_H0 = []
-	likelihood_H1 = []
+	likelihoodr_H0 = []
+	likelihoodr_H1 = []
 
 	# Calculates likelihood of each hypothesis
-	for i in range(len(table_H0)):
+	for i in range(len(table)):
 		
-		LH0 = (beta_H0/beta_H1)*(beta(pH0_white[i], alpha_H1[0]) *  beta(pH0_green[i], alpha_H1[1]) * beta(pH0_black[i], alpha_H1[2])) \
-				/ (beta(pH0_white[i], alpha_H0[0]) *  beta(pH0_green[i], alpha_H0[1]) * beta(pH0_black[i], alpha_H0[2]))
-		LH1 = (beta_H1/beta_H0)*(beta(pH0_white[i], alpha_H0[0]) *  beta(pH0_green[i], alpha_H0[1]) * beta(pH0_black[i], alpha_H0[2])) \
-				/ (beta(pH0_white[i], alpha_H1[0]) *  beta(pH0_green[i], alpha_H1[1]) * beta(pH0_black[i], alpha_H1[2]))
-		likelihood_H0.append(LH0)
-		likelihood_H1.append(LH1)
+		LHR_H0 = (beta(alpha_H1[0], alpha_H1[1]) / beta(alpha_H0[0], alpha_H0[1]))*(beta(pH0_white[i] + alpha_H0[0], total - pH0_white[i] + alpha_H0[1]) \
+		/ beta(pH0_white[i] + alpha_H1[0], total - pH0_white[i] + alpha_H1[1]))
+	
+		LHR_H1 = (beta(alpha_H0[0], alpha_H0[1]) / beta(alpha_H1[0], alpha_H1[1]))*(beta(pH0_white[i] + alpha_H1[0], total - pH0_white[i] + alpha_H1[1]) \
+		/ beta(pH0_white[i] + alpha_H0[0], total - pH0_white[i] + alpha_H0[1]))
+		
+		likelihoodr_H0.append(np.log10(LHR_H0))
+		likelihoodr_H1.append(np.log10(LHR_H1))
 	   
-
+	test = np.quantile(likelihoodr_H0, [.05, .95])
 	# Plots the log-likelihood
-	sns.histplot(np.log(likelihood_H0),stat='probability', bins=10, element="step", color = 'blue', alpha= .5, label=rf'H0 - $\alpha = {str(alpha_H0)}$')
-	sns.histplot(np.log(likelihood_H1),stat='probability', bins=10, element="step", color = 'orange', alpha= .5, label=rf'H1 - $\alpha = {str(alpha_H1)}$')
+	sns.histplot(likelihoodr_H0,stat='probability', bins=10, element="step", color = 'blue', alpha= .5, label=rf'H0 - $\alpha = {str(alpha_H0)}$')
+	sns.histplot(likelihoodr_H1,stat='probability', bins=10, element="step", color = 'orange', alpha= .5, label=rf'H1 - $\alpha = {str(alpha_H1)}$')
 	plt.xlabel('Log-Likelihood (log(P(X | H0)/ P(X| H1)))')
+	plt.yscale('log')
 	plt.title(rf'Log Likelihood for $\alpha = {str(alpha_H0)}$ vs $\alpha = {str(alpha_H1)}$, {total} draws')
 	plt.legend()
+	plt.axvline(x = test[0], color='r')
+	plt.text(.45*max(likelihoodr_H0), .1, f' reject: LLRH0 < {round(test[0], 2)}')
 	#plt.savefig(f'LLH0_{total}')
 	plt.show()
