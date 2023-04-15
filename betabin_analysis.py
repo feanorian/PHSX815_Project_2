@@ -16,6 +16,7 @@ import csv
 import pandas as pd
 import seaborn as sns
 import random
+import matplotlib.tri as tri
 from scipy.special import beta
 
 if __name__ == "__main__":
@@ -27,7 +28,11 @@ if __name__ == "__main__":
 		InputFile = sys.argv[p+1]
 	
 	# Opens the datafile and reads it into array   
-	
+	def find_nearest(array, value):
+		array = np.asarray(array)
+		idx = (np.abs(array - value)).argmin()
+		return array[idx]
+
 	with open(InputFile) as file:
 		table = pd.read_csv(file)
 		print(table.head()) 
@@ -68,16 +73,29 @@ if __name__ == "__main__":
 		
 		likelihoodr_H0.append(np.log10(LHR_H0))
 		likelihoodr_H1.append(np.log10(LHR_H1))
-	   
+	
+	crit = likelihoodr_H0.index(find_nearest(likelihoodr_H0, value=0.0))
+	beta = (likelihoodr_H0 == likelihoodr_H0[crit]).sum() / len(likelihoodr_H0)
+	
 	test = np.quantile(likelihoodr_H0, [.05, .95])
+	reject = round(find_nearest(likelihoodr_H0, value=0.0), 4)
+	x_95 = pH0_white[likelihoodr_H0.index(test[0])]
+
+	textstr = '\n'.join((
+	rf'.95 CL @ LLRH0 < {round(reject, 4)}',
+    	rf'$\alpha$ =.05 @ x = {x_95}',
+    	rf'$\beta$ = {round(beta, 4)}',
+    	rf'power = {round((1-beta), 4)}'))
+
+	
 	# Plots the log-likelihood
-	sns.histplot(likelihoodr_H0,stat='probability', bins=10, element="step", color = 'blue', alpha= .5, label=rf'H0 - $\alpha = {str(alpha_H0)}$')
-	sns.histplot(likelihoodr_H1,stat='probability', bins=10, element="step", color = 'orange', alpha= .5, label=rf'H1 - $\alpha = {str(alpha_H1)}$')
+	ax0 = sns.histplot(likelihoodr_H0,stat='probability', bins=20, element="step", color = 'blue', alpha= .5, label=rf'H0 - $\alpha = {str(alpha_H0)}$')
+	ax1 = sns.histplot(likelihoodr_H1,stat='probability', bins=20, element="step", color = 'orange', alpha= .5, label=rf'H1 - $\alpha = {str(alpha_H1)}$')
 	plt.xlabel('Log-Likelihood (log(P(X | H0)/ P(X| H1)))')
 	plt.yscale('log')
 	plt.title(rf'Log Likelihood for $\alpha = {str(alpha_H0)}$ vs $\alpha = {str(alpha_H1)}$, {total} draws')
+	plt.axvline(x = find_nearest(likelihoodr_H0, value=0.0), color='r', label=rf'LH0 = LH1')
+	plt.annotate(textstr, xy=(0.05, 0.65), xycoords='axes fraction')
 	plt.legend()
-	plt.axvline(x = test[0], color='r')
-	plt.text(.45*max(likelihoodr_H0), .1, f' reject: LLRH0 < {round(test[0], 2)}')
-	#plt.savefig(f'LLH0_{total}')
+	plt.savefig(f'LLH0_{total}')
 	plt.show()
