@@ -149,13 +149,6 @@ if __name__ == "__main__":
 		print(table_joined.head())
 		
 
-	# This plots histograms for each color for the entire ensemble of urns set the '-hist' flag to draw them
-	#white_H0 = [i[0] for i in urns_H0]
-	#white_H1 = [i[0] for i in urns_H1]
-
-	#black_H0 = [k[1] for k in urns_H0]
-	#black_H1 = [k[1] for k in urns_H1]
-
 	# Histogram for Black marbles under hypothesis 0
 	sns.histplot(table_H0['black H0'],stat='probability', element="step",fill = True, color = 'k', bins='auto', alpha=.25)
 	plt.xlabel('Counts')
