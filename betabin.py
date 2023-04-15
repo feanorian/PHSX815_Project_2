@@ -4,8 +4,8 @@ Name: Craig Brooks
 PHSX 815 Spring 2023
 Project # 2
 Due Date 4/10/2023
-This code generates samples from 2 populations of urns from that are Dirichlet distributed. Each urn has 10000 marbles from which 1000 marbles 
-are drawn. The results of this sampling is passed to another script `dirichlet_analysis.py` to calculate log liklihood of getting the counts 
+This code generates samples from 2 populations of urns from that are beta-binomial distributed. Each urn has 10000 marbles from which 1000 marbles 
+are drawn. The results of this sampling is passed to another script `betabin_analysis.py` to calculate log liklihood of getting the counts 
 observed
 """
 
