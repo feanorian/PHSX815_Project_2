@@ -1,2 +1,3 @@
 # PHSX815_Project_2
-This will be the repository for Project 2 for PHSX 815 Spring 2023
+
+![LLH0_100](https://user-images.githubusercontent.com/12628872/232173466-97d39a4f-3a3c-4303-b91c-79d9cc6371cd.png)
